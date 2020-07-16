@@ -444,7 +444,7 @@ export default function Home({ homes }) {
         </>
     )
 }
-export async function getStaticProps() {
+export async function getServerSideProps() {
 
     var homesRepository = new HomesRepository(process.env.mongodbConnectionString);
     var homes = await homesRepository.GetHomes();
