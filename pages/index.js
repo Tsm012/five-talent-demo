@@ -9,28 +9,20 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Modal from 'react-bootstrap/Modal';
-import Alert from 'react-bootstrap/Alert';
 
 import React, { useState } from 'react';
-//import { withIronSession } from "next-iron-session";
-
-const MongoClient = require('mongodb').MongoClient;
+import HomesRepository from '../repositories/homes-repository'
 
 export default function Home({ homes }) {
 
-    //Switches for create and edit modals
-    const [showCreateModal, setShowCreateModal] = useState(false);
+    //Switch for viewing modal
     const [showEditModal, setShowEditModal] = useState(false);
-
-    //Switch to show error for duplicate MLS dds
-    const [showError, setShowError] = useState(false);
 
     //List of all homes in the System
     const [homesList, setHomesList] = useState(homes);
 
     //Edit home model
     const [editHomeModel, setEditHomeModel] = useState({
-        _id: "",
         MLSNumber: "",
         Street1: "",
         Street2: "",
@@ -48,47 +40,9 @@ export default function Home({ homes }) {
         LotSize: "",
         Description: ""
     });
-
-    //Create home model
-    const [createHomeModel, setCreateHomeModel] = useState({
-        MLSNumber: "",
-        Street1: "",
-        Street2: "",
-        City: "",
-        State: "",
-        ZipCode: "",
-        Neighborhood: "",
-        SalesPrice: "",
-        DateListed: "",
-        Bedrooms: "",
-        Photos: "",
-        Bathrooms: "",
-        GarageSize: "",
-        SquareFeet: "",
-        LotSize: "",
-        Description: ""
-    });
-
-    const handleChangeToCreateHomeModel = async (event) => {
-        setCreateHomeModel({
-            ...createHomeModel,
-            [event.target.name]: event.target.value
-        });
-    }
-
-    const handleChangeToEditHomeModel = async (event) => {
-
-        setEditHomeModel({
-            ...editHomeModel,
-            [event.target.name]: event.target.value
-        });
-
-        
-    }
 
     const handleClickForListingItem = async (home) => {
         setEditHomeModel({
-            _id: home._id,
             MLSNumber: home.MLSNumber,
             Street1: home.Street1,
             Street2: home.Street2,
@@ -110,76 +64,45 @@ export default function Home({ homes }) {
         setShowEditModal(true);
     }
 
-    const handleCreateNewListing = async (event) => {
+    const handleSearchChange = async (event) => {
 
-        event.preventDefault();
+        var filteredList = []
 
-        const rawResponse = await fetch('api/homes', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(createHomeModel)
-        });
+        console.log(homes);
 
-        const content = await rawResponse.json();
-
-        if (content.error) {
-            setShowError(true);
-        } else {
-            setHomesList(content)
-            setShowCreateModal(false)
+        for (var home of homes) {
+            if (home.MLSNumber.includes(event.target.value)) {
+                filteredList.push(home);
+                continue;
+            }
+            if (home.City.includes(event.target.value)) {
+                filteredList.push(home);
+                continue;
+            }
+            if (home.State.includes(event.target.value)) {
+                filteredList.push(home);
+                continue;
+            }
+            if (home.ZipCode.includes(event.target.value)) {
+                filteredList.push(home);
+                continue;
+            }
+            if (home.Bedrooms.includes(event.target.value)) {
+                filteredList.push(home);
+                continue;
+            }
+            if (home.Bathrooms.includes(event.target.value)) {
+                filteredList.push(home);
+                continue;
+            }
+            if (home.SquareFeet.includes(event.target.value)) {
+                filteredList.push(home);
+                continue;
+            }
         }
 
-    };
+        setHomesList(filteredList);
 
-    const handleEditListing = async (event) => {
-        event.preventDefault();
-
-        const rawResponse = await fetch('api/homes', {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(editHomeModel)
-        });
-
-        const content = await rawResponse.json();
-
-        if (content.error) {
-            setShowError(true);
-        } else {
-            setHomesList(content)
-            setShowEditModal(false)
-        }
-
-    };
-
-    const handleDeleteListing = async () => {
-
-        event.preventDefault();
-
-        const rawResponse = await fetch('api/homes', {
-            method: 'DELETE',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(editHomeModel)
-        });
-
-        const content = await rawResponse.json();
-
-        if (content.error) {
-            setShowError(true);
-        } else {
-            setHomesList(content)
-            setShowEditModal(false)
-        }
-
-        setShowEditModal(false)
     }
 
     return (
@@ -196,11 +119,18 @@ export default function Home({ homes }) {
             <Container>
                 <Card>
                     <Card.Body>
-                        <Card.Title>Real Estate Admin</Card.Title>
-                        
-                        <Button variant="primary" onClick={() => setShowCreateModal(true)}>Create Listing</Button>
+                        <Card.Title>Real Estate Search</Card.Title>
+                        <Card.Text>Search our listings</Card.Text>
                     </Card.Body>
                 </Card>
+
+                <Form>
+                    <Row>
+                        <Col>
+                            <Form.Control placeholder="Search" onChange={handleSearchChange} />
+                        </Col>
+                    </Row>
+                </Form>
 
                 <ListGroup>
                     {
@@ -218,248 +148,43 @@ export default function Home({ homes }) {
                                         <Button variant="primary" onClick={() => handleClickForListingItem(home)}>View Property</Button>
                                     </Card.Body>
                                 </Card>
+                                
                             </ListGroup.Item>
                         )
                     }
-
                 </ListGroup>
-
             </Container>
 
-            <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)} size="lg">
-                <Form onSubmit={handleCreateNewListing}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Create New Listing</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>MLS Number</Form.Label>
-                                <Form.Control required type="text" placeholder="Enter MLS Number" name="MLSNumber" onChange={handleChangeToCreateHomeModel} />
-                                <Alert show={showError} variant="danger" onClose={() => setShowError(false)} dismissible>
-                                    <p>
-                                        MLS Number Already Exists
-                                    </p>
-                                </Alert>
-                            </Form.Group>
-                        </Form.Row>
-
-                        <Form.Group>
-                            <Form.Label>Address</Form.Label>
-                            <Form.Control name="Street1" placeholder="1234 Main St" onChange={handleChangeToCreateHomeModel} />
-                        </Form.Group>
-
-                        <Form.Group>
-                            <Form.Label>Address 2</Form.Label>
-                            <Form.Control name="Street2" placeholder="Apartment, studio, or floor" onChange={handleChangeToCreateHomeModel} />
-                        </Form.Group>
-
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>City</Form.Label>
-                                <Form.Control name="City" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>State</Form.Label>
-                                <Form.Control name="State" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Zip</Form.Label>
-                                <Form.Control name="ZipCode" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                        </Form.Row>
-
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>Neighborhood</Form.Label>
-                                <Form.Control name="Neighborhood" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Sales Price</Form.Label>
-                                <Form.Control name="SalesPrice" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Date Listed</Form.Label>
-                                <Form.Control name="DateListed" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                        </Form.Row>
-
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>Bedrooms</Form.Label>
-                                <Form.Control name="Bedrooms" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Photos</Form.Label>
-                                <Form.Control name="Photos" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Bathrooms</Form.Label>
-                                <Form.Control name="Bathrooms" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                        </Form.Row>
-
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>Garage Size</Form.Label>
-                                <Form.Control name="GarageSize" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Square Feet</Form.Label>
-                                <Form.Control name="SquareFeet" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Lot Size</Form.Label>
-                                <Form.Control name="LotSize" onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                        </Form.Row>
-
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>Description</Form.Label>
-                                <Form.Control name="Description" as='textarea' onChange={handleChangeToCreateHomeModel} />
-                            </Form.Group>
-                        </Form.Row>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
-                            Close
-                    </Button>
-                        <Button variant="primary" type="submit">
-                            Create New Listing
-                    </Button>
-                    </Modal.Footer>
-                </Form>
-            </Modal>
-
             <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
-                <Form onSubmit={handleEditListing}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Edit Listing</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
+                <ListGroup>
+                    <ListGroup.Item><b>MLS Number:</b> {editHomeModel.MLSNumber}</ListGroup.Item>
+                    <ListGroup.Item><b>Street Address:</b> {editHomeModel.Street1}</ListGroup.Item>
+                    <ListGroup.Item><b>Street Address2:</b> {editHomeModel.Street2}</ListGroup.Item>
+                    <ListGroup.Item><b>State:</b> {editHomeModel.State}</ListGroup.Item>
+                    <ListGroup.Item><b>Zip Code:</b> {editHomeModel.ZipCode}</ListGroup.Item>
+                    <ListGroup.Item><b>Neighborhood:</b> {editHomeModel.Neighborhood}</ListGroup.Item>
+                    <ListGroup.Item><b>Sales Price:</b> {editHomeModel.SalesPrice}</ListGroup.Item>
+                    <ListGroup.Item><b>Date Listed:</b> {editHomeModel.DateListed}</ListGroup.Item>
+                    <ListGroup.Item><b>Bedrooms:</b> {editHomeModel.Bedrooms}</ListGroup.Item>
+                    <ListGroup.Item><b>Photos:</b> {editHomeModel.Photos}</ListGroup.Item>
+                    <ListGroup.Item><b>Bathrooms:</b> {editHomeModel.Bathrooms}</ListGroup.Item>
+                    <ListGroup.Item><b>GarageSize:</b> {editHomeModel.GarageSize}</ListGroup.Item>
+                    <ListGroup.Item><b>Square Feet:</b> {editHomeModel.SquareFeet}</ListGroup.Item>
+                    <ListGroup.Item><b>Lot Size:</b> {editHomeModel.LotSize}</ListGroup.Item>
+                    <ListGroup.Item><b>Description:</b> {editHomeModel.Description}</ListGroup.Item>
+                </ListGroup>
 
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>MLS Number</Form.Label>
-                                <Form.Control required type="text" placeholder="Enter MLS Number" defaultValue={editHomeModel.MLSNumber} name="MLSNumber" onChange={handleChangeToEditHomeModel} />
-                                <Alert show={showError} variant="danger" onClose={() => setShowError(false)} dismissible>
-                                    <p>
-                                        MLS Number Already Exists
-                                    </p>
-                                </Alert>
-                            </Form.Group>
-                        </Form.Row>
-
-                        <Form.Group>
-                            <Form.Label>Address</Form.Label>
-                            <Form.Control name="Street1" placeholder="1234 Main St" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.Street1} />
-                        </Form.Group>
-
-                        <Form.Group>
-                            <Form.Label>Address 2</Form.Label>
-                            <Form.Control name="Street2" placeholder="Apartment, studio, or floor" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.Street2} />
-                        </Form.Group>
-
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>City</Form.Label>
-                                <Form.Control name="City" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.City} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>State</Form.Label>
-                                <Form.Control name="State" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.State} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Zip</Form.Label>
-                                <Form.Control name="ZipCode" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.Zip} />
-                            </Form.Group>
-                        </Form.Row>
-
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>Neighborhood</Form.Label>
-                                <Form.Control name="Neighborhood" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.Neighborhood} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Sales Price</Form.Label>
-                                <Form.Control name="SalesPrice" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.SalesPrice} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Date Listed</Form.Label>
-                                <Form.Control name="DateListed" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.DateListed} />
-                            </Form.Group>
-                        </Form.Row>
-
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>Bedrooms</Form.Label>
-                                <Form.Control name="Bedrooms" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.Bedrooms} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.File id="formcheck-api-regular">
-                                    <Form.File.Label>Photo</Form.File.Label>
-                                    <Form.File.Input name="Photos" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.Photos}/>
-                                </Form.File>
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Bathrooms</Form.Label>
-                                <Form.Control name="Bathrooms" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.Bathrooms} />
-                            </Form.Group>
-                        </Form.Row>
-
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>Garage Size</Form.Label>
-                                <Form.Control name="GarageSize" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.GarageSize} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Square Feet</Form.Label>
-                                <Form.Control name="SquareFeet" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.SquareFeet} />
-                            </Form.Group>
-                            <Form.Group as={Col}>
-                                <Form.Label>Lot Size</Form.Label>
-                                <Form.Control name="LotSize" onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.LotSize} />
-                            </Form.Group>
-                        </Form.Row>
-
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>Description</Form.Label>
-                                <Form.Control name="Description" as='textarea' onChange={handleChangeToEditHomeModel} defaultValue={editHomeModel.Description} />
-                            </Form.Group>
-                        </Form.Row>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="danger" className="text-left" onClick={handleDeleteListing}>
-                            Delete Listing
-                        </Button>
-                        <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-                            Close
-                        </Button>
-                        <Button variant="primary" type="submit">
-                            Update Listing
-                        </Button>
-                    </Modal.Footer>
-                </Form>
+                <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+                    Close
+                </Button>
             </Modal>
         </>
     )
 }
 export async function getStaticProps() {
 
-    const client = new MongoClient(process.env.mongodbConnectionString, { useNewUrlParser: true });
-
-    await client.connect();
-
-    const collection = client.db("five-talent-realestate").collection("homes")
-
-    let homes = await collection.find({}).toArray();
-
-    homes = JSON.parse(JSON.stringify(homes));
-
-    client.close();
+    var homesRepository = new HomesRepository(process.env.mongodbConnectionString);
+    var homes = await homesRepository.GetHomes();
 
     return {
         props: {
