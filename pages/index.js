@@ -108,7 +108,7 @@ export default function Home({ homes }) {
     return (
         <>
             <Head>
-                <title>Create Next App</title>
+                <title>Five Talent</title>
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
