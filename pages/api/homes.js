@@ -15,11 +15,7 @@ export default async (req, res) => {
     
             var homesRepository = new HomesRepository(process.env.mongodbConnectionString);
 
-            console.log("Getting Home");
-
             var home = await homesRepository.GetHome(req.body.MLSNumber);
-
-            console.log(home);
 
             //Don't insert Duplicate MLS numbers
             if(home !== null && home._id.toString() !== req.body._id){
@@ -28,11 +24,7 @@ export default async (req, res) => {
                 return;
             }
 
-            console.log("Update Home");
-
             await homesRepository.UpdateHome(req.body);
-
-            console.log("Home Updated");
 
             var homes = await homesRepository.GetHomes();
 
