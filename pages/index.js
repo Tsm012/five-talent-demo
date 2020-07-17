@@ -71,31 +71,31 @@ export default function Home({ homes }) {
         console.log(homes);
 
         for (var home of homes) {
-            if (home.MLSNumber.includes(event.target.value)) {
+            if (home.MLSNumber.toLowerCase().includes(event.target.value.toLowerCase())) {
                 filteredList.push(home);
                 continue;
             }
-            if (home.City.includes(event.target.value)) {
+            if (home.City.toLowerCase().includes(event.target.value)) {
                 filteredList.push(home);
                 continue;
             }
-            if (home.State.includes(event.target.value)) {
+            if (home.State.toLowerCase().includes(event.target.value)) {
                 filteredList.push(home);
                 continue;
             }
-            if (home.ZipCode.includes(event.target.value)) {
+            if (home.ZipCode.toLowerCase().includes(event.target.value)) {
                 filteredList.push(home);
                 continue;
             }
-            if (home.Bedrooms.includes(event.target.value)) {
+            if (home.Bedrooms.toLowerCase().includes(event.target.value)) {
                 filteredList.push(home);
                 continue;
             }
-            if (home.Bathrooms.includes(event.target.value)) {
+            if (home.Bathrooms.toLowerCase().includes(event.target.value)) {
                 filteredList.push(home);
                 continue;
             }
-            if (home.SquareFeet.includes(event.target.value)) {
+            if (home.SquareFeet.toLowerCase().includes(event.target.value)) {
                 filteredList.push(home);
                 continue;
             }
