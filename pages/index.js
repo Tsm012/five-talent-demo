@@ -160,6 +160,7 @@ export default function Home({ homes }) {
                     <ListGroup.Item><b>MLS Number:</b> {editHomeModel.MLSNumber}</ListGroup.Item>
                     <ListGroup.Item><b>Street Address:</b> {editHomeModel.Street1}</ListGroup.Item>
                     <ListGroup.Item><b>Street Address2:</b> {editHomeModel.Street2}</ListGroup.Item>
+                    <ListGroup.Item><b>City:</b> {editHomeModel.City}</ListGroup.Item>
                     <ListGroup.Item><b>State:</b> {editHomeModel.State}</ListGroup.Item>
                     <ListGroup.Item><b>Zip Code:</b> {editHomeModel.ZipCode}</ListGroup.Item>
                     <ListGroup.Item><b>Neighborhood:</b> {editHomeModel.Neighborhood}</ListGroup.Item>
