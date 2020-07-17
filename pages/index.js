@@ -138,7 +138,7 @@ export default function Home({ homes }) {
                             <ListGroup.Item>
                                 <Card>
                                     <Card.Body>
-                                        <Card.Title>{home.MLSNumber}</Card.Title>
+                                        <Card.Title>MLS Number: {home.MLSNumber}</Card.Title>
                                         <Card.Text>
                                             <p><b>City: </b> {home.City}</p>
                                             <p><b>Sales Price: </b> {home.SalesPrice}</p>
